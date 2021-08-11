@@ -106,7 +106,7 @@ class ProxyUtils {
 
 //=========================================
 //客户端代码
-class LogInterceptor implements MyInterceptor {
+/*class LogInterceptor implements MyInterceptor {
 
     @Override
     public void before(Object proxy, Method method, Object[] args) {
@@ -116,6 +116,39 @@ class LogInterceptor implements MyInterceptor {
     @Override
     public void after(Object proxy, Method method, Object[] args, Object result) {
         System.out.println(method.getName() + " 方法，结果：" + result);
+    }
+}*/
+
+class AddInterceptor implements MyInterceptor {
+
+    @Override
+    public void before(Object proxy, Method method, Object[] args) {
+        if("add".equals(method.getName())) {
+            System.out.println(method.getName() + " 方法，入参：" + Arrays.toString(args));
+        }
+    }
+
+    @Override
+    public void after(Object proxy, Method method, Object[] args, Object result) {
+        if("add".equals(method.getName())) {
+            System.out.println(method.getName() + " 方法，结果：" + result);
+        }
+    }
+}
+class SubInterceptor implements MyInterceptor {
+
+    @Override
+    public void before(Object proxy, Method method, Object[] args) {
+        if("sub".equals(method.getName())) {
+            System.out.println(method.getName() + " method，params：" + Arrays.toString(args));
+        }
+    }
+
+    @Override
+    public void after(Object proxy, Method method, Object[] args, Object result) {
+        if("sub".equals(method.getName())) {
+            System.out.println(method.getName() + " method，result：" + result);
+        }
     }
 }
 
@@ -137,23 +170,24 @@ public class AppTest {
 
 
         //ICalculate clac = new MyProxy<ICalculate>().getProxy(ICalculate.class);
-        ICalculate clac = ProxyUtils.getProxy(new CalculateImpl(), new LogInterceptor());
+        ICalculate clac = ProxyUtils.getProxy(new CalculateImpl(), new AddInterceptor());
+         clac = ProxyUtils.getProxy(clac, new SubInterceptor());
+
         System.out.println(clac.add(1, 2));
         System.out.println(clac.sub(1, 2));
         System.out.println(clac.mul(1, 2));
         System.out.println(clac.div(1, 2));
 
-        System.out.println("==========================");
 
-        A b = ProxyUtils.getProxy(new B(), new LogInterceptor());
-        b.f1();
+
 
         /**
          * 目前来看，可以解决，客户加日志、加缓存、加一些扩展功能的需求。
          *
          * 但是，变化来了：客户想要在add()方法前后加入中文日志，在sub()方法前后加英文日志，在mul()方法前后不加日志，在div()方法前后加入日文日志。
          * 你怎么处理这种需求？首先考虑到 在 LogInterceptor 的 before() 、after() 中 加入判断，如果是add() .....，
-         * 这样虽然能完成需求但是，一堆if() else()，感觉不够友好，还是不能应对变化。因为违反了单一职责原则，本来是只有一个日志功能，结果是细化了四个小功能
+         * 这样虽然能完成需求但是，一堆if() else()，感觉不够友好，还是不能应对变化。因为违反了单一职责原则，本来是只有一个日志功能，结果是细化了四个小功能。
+         * 解决方式：可以编写四个拦截器，分别针对add()、sub()、mul()、div()进行处理。
          */
 
     }
